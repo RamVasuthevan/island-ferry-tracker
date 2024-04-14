@@ -123,8 +123,11 @@ def run():
     schedules_string = schedules_string.replace("Departs_City", "Departs City").replace(
         "Departs_Island", "Departs Island"
     )
+    LOGGER.info("Created schedules string")
+    LOGGER.info(schedules_string)
     with open("../../output/schedule.json", "w") as f:
         f.write(schedules_string)
+    LOGGER.info("Wrote schedules string to output/schedule.json")
 
 
 if __name__ == "__main__":
