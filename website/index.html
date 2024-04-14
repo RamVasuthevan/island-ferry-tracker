@@ -10,29 +10,67 @@
             const options = { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit' };
             document.getElementById('currentTime').innerText = new Date().toLocaleTimeString('en-US', options);
         }
-    
-        // Function to list the schedule for today
+
+        // Function to list the schedule for today and initialize ferry route dropdown
         async function listTodaySchedule() {
             const response = await fetch('data/schedule.json');
             const schedules = await response.json();
             const today = new Date().toISOString().split('T')[0];
-            const scheduleContainer = document.getElementById('todaySchedule');
-    
+            const routeSelect = document.getElementById('ferryRoute');
+
             schedules.forEach(schedule => {
                 if (new Date(schedule.start) <= new Date(today) && (schedule.end === null || new Date(schedule.end) >= new Date(today))) {
-                    scheduleContainer.innerHTML += `<h2>${schedule.name}</h2>`;
                     Object.keys(schedule.locations).forEach(location => {
-                        scheduleContainer.innerHTML += `<h3>${location}</h3>`;
                         Object.keys(schedule.locations[location]).forEach(direction => {
-                            // Convert times to AM/PM format
-                            const timesWithAmPm = schedule.locations[location][direction].map(time => convertToAmPm(time));
-                            scheduleContainer.innerHTML += `<p>${direction}: ${timesWithAmPm.join(', ')}</p>`;
+                            const routeOption = `${location} - ${direction}`;
+                            const option = document.createElement('option');
+                            option.value = JSON.stringify({location, direction});
+                            option.innerText = routeOption;
+                            routeSelect.appendChild(option);
                         });
                     });
                 }
             });
         }
-    
+
+        // Show next two ferry times based on selected route
+        async function showNextFerryTimes(selectedRoute) {
+            const {location, direction} = JSON.parse(selectedRoute);
+            const response = await fetch('data/schedule.json');
+            const schedules = await response.json();
+            const today = new Date().toISOString().split('T')[0];
+            const nextTimesContainer = document.getElementById('nextFerryTimes');
+            nextTimesContainer.innerHTML = ''; // Clear previous selection
+
+            schedules.forEach(schedule => {
+                if (new Date(schedule.start) <= new Date(today) && (schedule.end === null || new Date(schedule.end) >= new Date(today))) {
+                    const times = schedule.locations[location][direction];
+                    const nextTimes = getNextTwoTimes(times);
+                    if (nextTimes.length > 0) {
+                        nextTimesContainer.innerHTML += `<p>Next times for ${location} - ${direction}: ${nextTimes.join(', ')}</p>`;
+                    }
+                }
+            });
+        }
+
+        // Helper function to get the next two times
+        function getNextTwoTimes(times) {
+            const currentTime = new Date();
+            const currentHours = currentTime.getHours();
+            const currentMinutes = currentTime.getMinutes();
+            let nextTwoTimes = [];
+
+            for (let time of times) {
+                const [hours, minutes] = time.split(':').map(num => parseInt(num, 10));
+                if (hours > currentHours || (hours === currentHours && minutes > currentMinutes)) {
+                    nextTwoTimes.push(convertToAmPm(time));
+                    if (nextTwoTimes.length === 2) break;
+                }
+            }
+
+            return nextTwoTimes;
+        }
+
         // Helper function to convert time to AM/PM format
         function convertToAmPm(time) {
             const [hours, minutes] = time.split(':');
@@ -47,19 +85,28 @@
                 return `${hoursInt - 12}:${minutes} PM`;
             }
         }
-    
+
         // Initialize functions on window load
         window.onload = function() {
             displayCurrentTimeEST();
             listTodaySchedule();
             setInterval(displayCurrentTimeEST, 1000); // Update the time every second
         };
+
+        // Add event listener to ferry route select dropdown
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('ferryRoute').addEventListener('change', (event) => {
+                showNextFerryTimes(event.target.value);
+            });
+        });
     </script>
-    
 </head>
 <body>
     <h1>Hello, World!</h1>
     <p>Current Time (EST): <span id="currentTime"></span></p>
-    <div id="todaySchedule"></div>
+    <select id="ferryRoute">
+        <option value="">Select Ferry Route</option>
+    </select>
+    <div id="nextFerryTimes"></div>
 </body>
 </html>
