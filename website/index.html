@@ -13,7 +13,7 @@
 
         // Function to list the schedule for today
         async function listTodaySchedule() {
-            const response = await fetch('date/schedule.json');
+            const response = await fetch('data/schedule.json');
             const schedules = await response.json();
             const today = new Date().toISOString().split('T')[0];
             const scheduleContainer = document.getElementById('todaySchedule');
