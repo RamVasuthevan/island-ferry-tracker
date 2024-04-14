@@ -4,6 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hello World</title>
+    <style>
+        #nextTimesTable, #ferryTimes {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #nextTimesTable {
+            background-color: #f0f0f0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
     <script>
         function displayCurrentTimeEST() {
             const options = { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit' };
@@ -48,62 +72,47 @@
             const response = await fetch('data/schedule.json');
             const schedules = await response.json();
             const today = new Date().toISOString().split('T')[0];
-            const timesContainer = document.getElementById('ferryTimes');
-            timesContainer.innerHTML = ''; // Clear previous selection
+            const nextTimesTable = document.getElementById('nextTimesTable');
+            nextTimesTable.innerHTML = ''; // Clear previous selection
+            const ferryTimes = document.getElementById('ferryTimes');
+            ferryTimes.innerHTML = '';
 
-            let remainingTimes = [];
-
-            schedules.forEach(schedule => {
-                if (new Date(schedule.start) <= new Date(today) && (schedule.end === null || new Date(schedule.end) >= new Date(today))) {
-                    remainingTimes = getNextTwoTimes(schedule.locations[location][direction], true);
-                }
-            });
+            let remainingTimes = schedules.map(schedule => schedule.locations[location][direction]).flat();
+            remainingTimes = remainingTimes.filter(time => isLaterThanCurrentTime(time));
 
             if (remainingTimes.length > 0) {
-                let table = `<p>Remaining Schedule for ${routeOption} today:</p>`;
-                table += `<table border="1"><tr><th>Departure Times</th></tr>`;
-
-                remainingTimes.forEach(time => {
-                    table += `<tr><td>${time}</td></tr>`;
+                let nextTwoTimes = remainingTimes.slice(0, 2);
+                let nextTimesTableHTML = `<table><tr><th colspan="2">Next Departures</th></tr>`;
+                nextTwoTimes.forEach(time => {
+                    nextTimesTableHTML += `<tr><td colspan="2">${convertToAmPm(time)}</td></tr>`;
                 });
+                nextTimesTableHTML += `</table>`;
+                nextTimesTable.innerHTML = nextTimesTableHTML;
 
-                table += `</table>`;
-                timesContainer.innerHTML = table;
+                let remainingTimesTableHTML = `<table><tr><th>Remaining Times Today</th></tr>`;
+                remainingTimes.forEach(time => {
+                    remainingTimesTableHTML += `<tr><td>${convertToAmPm(time)}</td></tr>`;
+                });
+                remainingTimesTableHTML += `</table>`;
+                ferryTimes.innerHTML = remainingTimesTableHTML;
             } else {
-                timesContainer.innerHTML = `<p>No more departures for ${routeOption} today.</p>`;
+                ferryTimes.innerHTML = `<p>No more departures for ${routeOption} today.</p>`;
             }
         }
 
-        function getNextTwoTimes(times, getAllRemaining = false) {
+        function isLaterThanCurrentTime(time) {
+            const [hours, minutes] = time.split(':').map(Number);
             const currentTime = new Date();
-            const currentHours = currentTime.getHours();
-            const currentMinutes = currentTime.getMinutes();
-            let nextTimes = [];
-
-            for (let time of times) {
-                const [hours, minutes] = time.split(':').map(num => parseInt(num, 10));
-                if (hours > currentHours || (hours === currentHours && minutes > currentMinutes)) {
-                    const formattedTime = convertToAmPm(time);
-                    nextTimes.push(formattedTime);
-                    if (!getAllRemaining && nextTimes.length === 2) break;
-                }
-            }
-
-            return nextTimes;
+            return hours > currentTime.getHours() || (hours === currentTime.getHours() && minutes > currentTime.getMinutes());
         }
 
         function convertToAmPm(time) {
             const [hours, minutes] = time.split(':');
             const hoursInt = parseInt(hours, 10);
-            if (hoursInt === 0) {
-                return `12:${minutes} AM`;
-            } else if (hoursInt < 12) {
-                return `${hours}:${minutes} AM`;
-            } else if (hoursInt === 12) {
-                return `${hours}:${minutes} PM`;
-            } else {
-                return `${hoursInt - 12}:${minutes} PM`;
-            }
+            return hoursInt === 0 ? `12:${minutes} AM` :
+                   hoursInt < 12 ? `${hours}:${minutes} AM` :
+                   hoursInt === 12 ? `${hours}:${minutes} PM` :
+                                     `${hoursInt - 12}:${minutes} PM`;
         }
 
         window.onload = function() {
@@ -125,6 +134,7 @@
     <select id="ferryRoute">
         <option value="">Select Ferry Route</option>
     </select>
+    <div id="nextTimesTable"></div>
     <div id="ferryTimes"></div>
 </body>
 </html>
