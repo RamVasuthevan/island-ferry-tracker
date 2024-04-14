@@ -51,48 +51,56 @@
             const timesContainer = document.getElementById('ferryTimes');
             timesContainer.innerHTML = ''; // Clear previous selection
 
-            let table = `<p>Full Schedule for ${routeOption}:</p>`;
-            table += `<table border="1"><tr><th>Departure Times</th></tr>`;
+            let remainingTimes = [];
 
             schedules.forEach(schedule => {
                 if (new Date(schedule.start) <= new Date(today) && (schedule.end === null || new Date(schedule.end) >= new Date(today))) {
-                    const times = schedule.locations[location][direction];
-                    times.forEach(time => {
-                        table += `<tr><td>${convertToAmPm(time)}</td></tr>`;
-                    });
+                    remainingTimes = getNextTwoTimes(schedule.locations[location][direction], true);
                 }
             });
 
-            table += `</table>`;
-            timesContainer.innerHTML = table;
+            if (remainingTimes.length > 0) {
+                let table = `<p>Remaining Schedule for ${routeOption} today:</p>`;
+                table += `<table border="1"><tr><th>Departure Times</th></tr>`;
+
+                remainingTimes.forEach(time => {
+                    table += `<tr><td>${time}</td></tr>`;
+                });
+
+                table += `</table>`;
+                timesContainer.innerHTML = table;
+            } else {
+                timesContainer.innerHTML = `<p>No more departures for ${routeOption} today.</p>`;
+            }
         }
 
-        function getNextTwoTimes(times) {
+        function getNextTwoTimes(times, getAllRemaining = false) {
             const currentTime = new Date();
             const currentHours = currentTime.getHours();
             const currentMinutes = currentTime.getMinutes();
-            let nextTwoTimes = [];
+            let nextTimes = [];
 
             for (let time of times) {
                 const [hours, minutes] = time.split(':').map(num => parseInt(num, 10));
                 if (hours > currentHours || (hours === currentHours && minutes > currentMinutes)) {
-                    nextTwoTimes.push(convertToAmPm(time));
-                    if (nextTwoTimes.length === 2) break;
+                    const formattedTime = convertToAmPm(time);
+                    nextTimes.push(formattedTime);
+                    if (!getAllRemaining && nextTimes.length === 2) break;
                 }
             }
 
-            return nextTwoTimes;
+            return nextTimes;
         }
 
         function convertToAmPm(time) {
             const [hours, minutes] = time.split(':');
             const hoursInt = parseInt(hours, 10);
             if (hoursInt === 0) {
-                return `12:${minutes} AM`; // Midnight edge case
+                return `12:${minutes} AM`;
             } else if (hoursInt < 12) {
-                return `${time} AM`;
+                return `${hours}:${minutes} AM`;
             } else if (hoursInt === 12) {
-                return `${time} PM`; // Noon edge case
+                return `${hours}:${minutes} PM`;
             } else {
                 return `${hoursInt - 12}:${minutes} PM`;
             }
