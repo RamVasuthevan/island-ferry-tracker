@@ -4,8 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hello World</title>
+    <script>
+        // Function to display the current time in EST
+        function displayCurrentTimeEST() {
+            const options = { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('currentTime').innerText = new Date().toLocaleTimeString('en-US', options);
+        }
+
+        // Function to list the schedule for today
+        async function listTodaySchedule() {
+            const response = await fetch('date/schedule.json');
+            const schedules = await response.json();
+            const today = new Date().toISOString().split('T')[0];
+            const scheduleContainer = document.getElementById('todaySchedule');
+
+            schedules.forEach(schedule => {
+                if (new Date(schedule.start) <= new Date(today) && (schedule.end === null || new Date(schedule.end) >= new Date(today))) {
+                    scheduleContainer.innerHTML += `<h2>${schedule.name}</h2>`;
+                    Object.keys(schedule.locations).forEach(location => {
+                        scheduleContainer.innerHTML += `<h3>${location}</h3>`;
+                        Object.keys(schedule.locations[location]).forEach(direction => {
+                            scheduleContainer.innerHTML += `<p>${direction}: ${schedule.locations[location][direction].join(', ')}</p>`;
+                        });
+                    });
+                }
+            });
+        }
+
+        // Initialize functions on window load
+        window.onload = function() {
+            displayCurrentTimeEST();
+            listTodaySchedule();
+            setInterval(displayCurrentTimeEST, 1000); // Update the time every second
+        };
+    </script>
 </head>
 <body>
     <h1>Hello, World!</h1>
+    <p>Current Time (EST): <span id="currentTime"></span></p>
+    <div id="todaySchedule"></div>
 </body>
 </html>
