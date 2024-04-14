@@ -1,0 +1,64 @@
+[
+    {
+      "name": "Spring 2024 Schedule",
+      "start": "2024-04-12",
+      "end": "2024-05-31",
+      "locations": {
+        "Centre Island": {
+          "Departs City": [
+            "8:00",
+            "8:30",
+            "23:20"
+          ],
+          "Departs Island": [
+            "8:00",
+            "8:30",
+            "23:20"
+          ]
+        },
+        "Hanlan’s Point": {
+          "Departs City": [
+            "8:00",
+            "8:30",
+            "23:20"
+          ],
+          "Departs Island": [
+            "8:00",
+            "8:30",
+            "23:20"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Summer 2024 Schedule",
+      "start": "2024-05-01",
+      "end": null,
+      "locations": {
+        "Centre Island": {
+          "Departs City": [
+            "8:00",
+            "8:30",
+            "23:20"
+          ],
+          "Departs Island": [
+            "8:00",
+            "8:30",
+            "23:20"
+          ]
+        },
+        "Hanlan’s Point": {
+          "Departs City": [
+            "8:00",
+            "8:30",
+            "23:20"
+          ],
+          "Departs Island": [
+            "8:00",
+            "8:30",
+            "23:20"
+          ]
+        }
+      }
+    }
+  ]
