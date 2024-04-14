@@ -2,9 +2,13 @@ from bs4 import BeautifulSoup
 import datetime
 from dataclasses import asdict
 import json
+import logging
 from schedule_scraper import ScheduleScraper
 from schedules import LocationSchedule, Schedule, Schedules
 from typing import Any, List, Optional, Tuple
+
+logging.basicConfig(level=logging.DEBUG)
+LOGGER = logging.getLogger("json_schedule_generator")
 
 
 class JsonScheduleGenerator:
@@ -14,6 +18,7 @@ class JsonScheduleGenerator:
     def create_schedules(*, schedules_soup: BeautifulSoup) -> Schedules:
         schedules = []
         for season in JsonScheduleGenerator.SEASONS:
+            LOGGER.info(f"Creating schedule for {season}")
             table_id = f"accordion-{season}-schedule"
             schedule_soup = schedules_soup.find(id=table_id)
             schedule = JsonScheduleGenerator._create_schedule(
@@ -21,6 +26,7 @@ class JsonScheduleGenerator:
             )
             if schedule is not None:
                 schedules.append(schedule)
+        LOGGER.info("Created all schedules")
         JsonScheduleGenerator._populate_end_dates(schedules=schedules)
         return Schedules(schedules=schedules)
 
@@ -48,6 +54,7 @@ class JsonScheduleGenerator:
     def _schedule_name_and_start_date(
         *, schedule_caption: str
     ) -> Tuple[Optional[str], Optional[datetime.date]]:
+        LOGGER.info("Finding schedule name and start date")
         if "starts" in schedule_caption:
             words = schedule_caption.split()
             name = f"{words[2].capitalize()} {words[1]} Schedule"
@@ -68,6 +75,7 @@ class JsonScheduleGenerator:
         location = (
             location_schedule_soup.contents[3].contents[1].contents[3].contents[0]
         )
+        LOGGER.info(f"Creating location schedule for {location}")
         if not isinstance(location, str):
             location = location.contents[0]
         location = " ".join(location.split()[1:])
@@ -89,6 +97,7 @@ class JsonScheduleGenerator:
 
     @staticmethod
     def _populate_end_dates(*, schedules: List[Schedule]) -> None:
+        LOGGER.info("Populating end dates for schedules")
         schedules.sort(key=lambda schedule: schedule.start)
         for i in range(len(schedules) - 1):
             schedules[i].end = schedules[i + 1].start - datetime.timedelta(days=1)

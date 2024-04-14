@@ -12,10 +12,12 @@ class ScheduleScraper:
 
     @staticmethod
     def scrape_schedules() -> BeautifulSoup:
+        ScheduleScraper.LOGGER.info("Retrieving ferry schedules")
         try:
             response = requests.get(ScheduleScraper.SCHEDULE_URL)
             response.raise_for_status()
         except requests.HTTPError as error:
             ScheduleScraper.LOGGER.error(error)
             raise error
+        ScheduleScraper.LOGGER.info("Successfully retrieved ferry schedules")
         return BeautifulSoup(response.text, "html.parser")
