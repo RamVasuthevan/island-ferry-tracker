@@ -10,27 +10,44 @@
             const options = { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit' };
             document.getElementById('currentTime').innerText = new Date().toLocaleTimeString('en-US', options);
         }
-
+    
         // Function to list the schedule for today
         async function listTodaySchedule() {
             const response = await fetch('data/schedule.json');
             const schedules = await response.json();
             const today = new Date().toISOString().split('T')[0];
             const scheduleContainer = document.getElementById('todaySchedule');
-
+    
             schedules.forEach(schedule => {
                 if (new Date(schedule.start) <= new Date(today) && (schedule.end === null || new Date(schedule.end) >= new Date(today))) {
                     scheduleContainer.innerHTML += `<h2>${schedule.name}</h2>`;
                     Object.keys(schedule.locations).forEach(location => {
                         scheduleContainer.innerHTML += `<h3>${location}</h3>`;
                         Object.keys(schedule.locations[location]).forEach(direction => {
-                            scheduleContainer.innerHTML += `<p>${direction}: ${schedule.locations[location][direction].join(', ')}</p>`;
+                            // Convert times to AM/PM format
+                            const timesWithAmPm = schedule.locations[location][direction].map(time => convertToAmPm(time));
+                            scheduleContainer.innerHTML += `<p>${direction}: ${timesWithAmPm.join(', ')}</p>`;
                         });
                     });
                 }
             });
         }
-
+    
+        // Helper function to convert time to AM/PM format
+        function convertToAmPm(time) {
+            const [hours, minutes] = time.split(':');
+            const hoursInt = parseInt(hours, 10);
+            if (hoursInt === 0) {
+                return `12:${minutes} AM`; // Midnight edge case
+            } else if (hoursInt < 12) {
+                return `${time} AM`;
+            } else if (hoursInt === 12) {
+                return `${time} PM`; // Noon edge case
+            } else {
+                return `${hoursInt - 12}:${minutes} PM`;
+            }
+        }
+    
         // Initialize functions on window load
         window.onload = function() {
             displayCurrentTimeEST();
@@ -38,6 +55,7 @@
             setInterval(displayCurrentTimeEST, 1000); // Update the time every second
         };
     </script>
+    
 </head>
 <body>
     <h1>Hello, World!</h1>
