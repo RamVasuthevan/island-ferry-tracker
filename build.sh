@@ -1,4 +1,3 @@
 #!/bin/bash
 
-cp output/schedule.json public/data/schedule.json
-
+cp output/schedule.json website/data/schedule.json
