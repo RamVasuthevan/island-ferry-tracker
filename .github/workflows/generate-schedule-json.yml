@@ -6,7 +6,7 @@ on:
     - cron: '0 0 1 * *'  # Run at UTC midnight on the first day of every month
 
 jobs:
-  ETL_bills:
+  generate_schedule_json:
     runs-on: ubuntu-latest
 
     steps:
