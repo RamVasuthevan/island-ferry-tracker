@@ -8,7 +8,9 @@ from bs4 import BeautifulSoup
 from schedule_scraper import ScheduleScraper
 from schedules import LocationSchedule, Schedule, Schedules
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 LOGGER = logging.getLogger("json_schedule_generator")
 
 
