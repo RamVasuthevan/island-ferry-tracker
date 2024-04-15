@@ -1,11 +1,12 @@
-from bs4 import BeautifulSoup
 import datetime
-from dataclasses import asdict
 import json
 import logging
+from dataclasses import asdict
+from typing import Any, List, Optional, Tuple
+
+from bs4 import BeautifulSoup
 from schedule_scraper import ScheduleScraper
 from schedules import LocationSchedule, Schedule, Schedules
-from typing import Any, List, Optional, Tuple
 
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger("json_schedule_generator")
