@@ -74,7 +74,7 @@
             const schedules = await response.json();
             const today = new Date().toISOString().split('T')[0];
             const timesContainer = document.getElementById('ferryTimes');
-            timesContainer.innerHTML = ''; // Clear previous selection
+            timesContainer.innerHTML = `<p>Ferries within the next hour are highlighted</p>`
 
             let allTimes = schedules[0].locations[location][direction];
             let remainingTimes = getRemainingTimes(allTimes);
@@ -82,15 +82,14 @@
             if (remainingTimes.length > 0) {
                 let tableHTML = `<table><tr><th>Remaining Schedule for ${routeOption} today:</th></tr>`;
                 remainingTimes.forEach(time => {
-                    console.log(time)
                     const highlightClass = isWithinNextHour(time) ? 'class="highlight"' : '';
                     tableHTML += `<tr ${highlightClass}><td>${convertToAmPm(time)}</td></tr>`;
                 });
 
                 tableHTML += `</table>`;
-                timesContainer.innerHTML = tableHTML;
+                timesContainer.innerHTML += tableHTML;
             } else {
-                timesContainer.innerHTML = `<p>No more departures for ${routeOption} today.</p>`;
+                timesContainer.innerHTML += `<p>No more departures for ${routeOption} today.</p>`;
             }
         }
 
@@ -120,8 +119,6 @@
             targetTime.setMinutes(minutes);
 
             const timeDifference = (targetTime - currentTime) / (1000 * 60); // Difference in minutes
-            console.log(`currentTime ${currentTime} targetTime ${targetTime} Time until ferry leaves: ${timeDifference} minutes`);
-
             return targetTime <= new Date(currentTime.getTime() + 60 * 60000);
         }
 
