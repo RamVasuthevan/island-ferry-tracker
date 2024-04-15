@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hello World</title>
     <style>
-        #nextTimesTable, #ferryTimes {
+        #ferryTimes {
             margin-top: 20px;
+            background-color: #f0f0f0; /* Light grey background */
             padding: 10px;
             border-radius: 5px;
-        }
-        #nextTimesTable {
-            background-color: #f0f0f0;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Soft shadow for emphasis */
         }
         table {
             width: 100%;
@@ -21,11 +19,14 @@
         th, td {
             text-align: left;
             padding: 8px;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #ddd; /* Light horizontal line between rows */
         }
         th {
             background-color: #4CAF50;
             color: white;
+        }
+        .highlight {
+            background-color: #d3d3d3; /* Grey highlight for times within the next hour */
         }
     </style>
     <script>
@@ -72,47 +73,72 @@
             const response = await fetch('data/schedule.json');
             const schedules = await response.json();
             const today = new Date().toISOString().split('T')[0];
-            const nextTimesTable = document.getElementById('nextTimesTable');
-            nextTimesTable.innerHTML = ''; // Clear previous selection
-            const ferryTimes = document.getElementById('ferryTimes');
-            ferryTimes.innerHTML = '';
+            const timesContainer = document.getElementById('ferryTimes');
+            timesContainer.innerHTML = ''; // Clear previous selection
 
-            let remainingTimes = schedules.map(schedule => schedule.locations[location][direction]).flat();
-            remainingTimes = remainingTimes.filter(time => isLaterThanCurrentTime(time));
+            let allTimes = schedules[0].locations[location][direction];
+            let remainingTimes = getRemainingTimes(allTimes);
 
             if (remainingTimes.length > 0) {
-                let nextTwoTimes = remainingTimes.slice(0, 2);
-                let nextTimesTableHTML = `<table><tr><th colspan="2">Next Departures</th></tr>`;
-                nextTwoTimes.forEach(time => {
-                    nextTimesTableHTML += `<tr><td colspan="2">${convertToAmPm(time)}</td></tr>`;
-                });
-                nextTimesTableHTML += `</table>`;
-                nextTimesTable.innerHTML = nextTimesTableHTML;
-
-                let remainingTimesTableHTML = `<table><tr><th>Remaining Times Today</th></tr>`;
+                let tableHTML = `<table><tr><th>Remaining Schedule for ${routeOption} today:</th></tr>`;
                 remainingTimes.forEach(time => {
-                    remainingTimesTableHTML += `<tr><td>${convertToAmPm(time)}</td></tr>`;
+                    console.log(time)
+                    const highlightClass = isWithinNextHour(time) ? 'class="highlight"' : '';
+                    tableHTML += `<tr ${highlightClass}><td>${convertToAmPm(time)}</td></tr>`;
                 });
-                remainingTimesTableHTML += `</table>`;
-                ferryTimes.innerHTML = remainingTimesTableHTML;
+
+                tableHTML += `</table>`;
+                timesContainer.innerHTML = tableHTML;
             } else {
-                ferryTimes.innerHTML = `<p>No more departures for ${routeOption} today.</p>`;
+                timesContainer.innerHTML = `<p>No more departures for ${routeOption} today.</p>`;
             }
         }
 
-        function isLaterThanCurrentTime(time) {
-            const [hours, minutes] = time.split(':').map(Number);
+        function getRemainingTimes(times) {
             const currentTime = new Date();
-            return hours > currentTime.getHours() || (hours === currentTime.getHours() && minutes > currentTime.getMinutes());
+            const currentHours = currentTime.getHours();
+            const currentMinutes = currentTime.getMinutes();
+            let nextTimes = [];
+
+            for (let time of times) {
+                const [hours, minutes] = time.split(':').map(num => parseInt(num, 10));
+                if (hours > currentHours || (hours === currentHours && minutes > currentMinutes)) {
+                    nextTimes.push(time);
+                }
+            }
+
+            return nextTimes;
         }
+
+        function isWithinNextHour(time) {
+            const currentTime = new Date();
+            const targetTime = new Date();
+            const [hours, minutes] = time.split(':').map(num => parseInt(num, 10));
+            
+            // Set the target time's hours and minutes
+            targetTime.setHours(hours);
+            targetTime.setMinutes(minutes);
+
+            const timeDifference = (targetTime - currentTime) / (1000 * 60); // Difference in minutes
+            console.log(`currentTime ${currentTime} targetTime ${targetTime} Time until ferry leaves: ${timeDifference} minutes`);
+
+            return targetTime <= new Date(currentTime.getTime() + 60 * 60000);
+        }
+
+
 
         function convertToAmPm(time) {
             const [hours, minutes] = time.split(':');
             const hoursInt = parseInt(hours, 10);
-            return hoursInt === 0 ? `12:${minutes} AM` :
-                   hoursInt < 12 ? `${hours}:${minutes} AM` :
-                   hoursInt === 12 ? `${hours}:${minutes} PM` :
-                                     `${hoursInt - 12}:${minutes} PM`;
+            if (hoursInt === 0) {
+                return `12:${minutes} AM`;
+            } else if (hoursInt < 12) {
+                return `${hours}:${minutes} AM`;
+            } else if (hoursInt === 12) {
+                return `${hours}:${minutes} PM`;
+            } else {
+                return `${hoursInt - 12}:${minutes} PM`;
+            }
         }
 
         window.onload = function() {
@@ -134,7 +160,6 @@
     <select id="ferryRoute">
         <option value="">Select Ferry Route</option>
     </select>
-    <div id="nextTimesTable"></div>
     <div id="ferryTimes"></div>
 </body>
 </html>
