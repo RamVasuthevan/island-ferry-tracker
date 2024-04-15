@@ -37,7 +37,8 @@
 
         async function listTodaySchedule() {
             const response = await fetch('data/schedule.json');
-            const schedules = await response.json();
+            const data = await response.json();
+            const schedules = data.schedules;
             const today = new Date().toISOString().split('T')[0];
             const routeSelect = document.getElementById('ferryRoute');
 
@@ -71,26 +72,33 @@
             }
 
             const response = await fetch('data/schedule.json');
-            const schedules = await response.json();
+            const data = await response.json();
+            const schedules = data.schedules;
             const today = new Date().toISOString().split('T')[0];
             const timesContainer = document.getElementById('ferryTimes');
-            timesContainer.innerHTML = `<p>Ferries within the next hour are highlighted</p>`
+            timesContainer.innerHTML = `<p>Ferries within the next hour are highlighted</p>`;
 
-            let allTimes = schedules[0].locations[location][direction];
-            let remainingTimes = getRemainingTimes(allTimes);
+            schedules.forEach(schedule => {
+                if (new Date(schedule.start) <= new Date(today) && (schedule.end === null || new Date(schedule.end) >= new Date(today))) {
+                    if (schedule.locations[location] && schedule.locations[location][direction]) {
+                        let allTimes = schedule.locations[location][direction];
+                        let remainingTimes = getRemainingTimes(allTimes);
 
-            if (remainingTimes.length > 0) {
-                let tableHTML = `<table><tr><th>Remaining Schedule for ${routeOption} today:</th></tr>`;
-                remainingTimes.forEach(time => {
-                    const highlightClass = isWithinNextHour(time) ? 'class="highlight"' : '';
-                    tableHTML += `<tr ${highlightClass}><td>${convertToAmPm(time)}</td></tr>`;
-                });
+                        if (remainingTimes.length > 0) {
+                            let tableHTML = `<table><tr><th>Remaining Schedule for ${routeOption} today:</th></tr>`;
+                            remainingTimes.forEach(time => {
+                                const highlightClass = isWithinNextHour(time) ? 'class="highlight"' : '';
+                                tableHTML += `<tr ${highlightClass}><td>${convertToAmPm(time)}</td></tr>`;
+                            });
 
-                tableHTML += `</table>`;
-                timesContainer.innerHTML += tableHTML;
-            } else {
-                timesContainer.innerHTML += `<p>No more departures for ${routeOption} today.</p>`;
-            }
+                            tableHTML += `</table>`;
+                            timesContainer.innerHTML += tableHTML;
+                        } else {
+                            timesContainer.innerHTML += `<p>No more departures for ${routeOption} today.</p>`;
+                        }
+                    }
+                }
+            });
         }
 
         function getRemainingTimes(times) {
@@ -119,10 +127,8 @@
             targetTime.setMinutes(minutes);
 
             const timeDifference = (targetTime - currentTime) / (1000 * 60); // Difference in minutes
-            return targetTime <= new Date(currentTime.getTime() + 60 * 60000);
+            return timeDifference <= 60;
         }
-
-
 
         function convertToAmPm(time) {
             const [hours, minutes] = time.split(':');
