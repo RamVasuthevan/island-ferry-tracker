@@ -20,8 +20,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Run main.py
-        working-directory: src/json-schedule-generator
+      - name: Run json_schedule_generator.py
+        working-directory: island-ferry-tracker/src/json-schedule-generator
         run: |
           python json_schedule_generator.py
       - name: Commit and Push if Files Changed
