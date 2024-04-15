@@ -28,6 +28,7 @@ jobs:
         run: |
           python json_schedule_generator.py
       - name: Commit and Push if Files Changed
+        working-directory: island-ferry-tracker
         run: |
           git config user.name "Automated"
           git config user.email "actions@users.noreply.github.com"
