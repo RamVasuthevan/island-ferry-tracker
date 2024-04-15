@@ -4,3 +4,33 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 0 1 * *'  # Run at UTC midnight on the first day of every month
+
+jobs:
+  generate_schedule_json:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout island-ferry-tracker
+        uses: actions/checkout@v4
+        with:
+          repository: 'RamVasuthevan/island-ferry-tracker'
+          path: island-ferry-tracker
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || 'main' }}
+      - name: Setup Python and Pipenv
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run main.py
+        working-directory: src/json-schedule-generator
+        run: |
+          python json_schedule_generator.py
+      - name: Commit and Push if Files Changed
+        run: |
+          git config user.name "Automated"
+          git config user.email "actions@users.noreply.github.com"
+          git add .
+          timestamp=$(date -u)
+          # Extract branch name from github.ref, assuming it's in refs/heads/branch_name format
+          branch_name=$(echo $GITHUB_REF | sed -e "s/^refs\/heads\///")
+          git commit -m "Downloaded: ${timestamp}: commit: ${{github.sha}}" || exit 0
+          git push origin HEAD:$branch_name --force
