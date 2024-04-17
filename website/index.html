@@ -6,6 +6,9 @@
     <title>City of Toronto Ferry Schedule</title>
     <style>
         #ferryTimes {
+            /* Initial styles remain unchanged */
+        }
+        .styledFerryTimes {
             margin-top: 20px;
             background-color: #f0f0f0; /* Light grey background */
             padding: 10px;
@@ -77,6 +80,9 @@
             const today = new Date().toISOString().split('T')[0];
             const timesContainer = document.getElementById('ferryTimes');
             timesContainer.innerHTML = `<p>Ferries within the next hour are highlighted</p>`;
+
+            // Apply dynamic styling here
+            timesContainer.classList.add('styledFerryTimes');
 
             schedules.forEach(schedule => {
                 if (new Date(schedule.start) <= new Date(today) && (schedule.end === null || new Date(schedule.end) >= new Date(today))) {
