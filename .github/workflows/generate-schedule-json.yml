@@ -28,9 +28,9 @@ jobs:
         run: |
           python json_schedule_generator.py
 
-          - name: Get current date
-          id: date
-          run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
       - name: Check for changes in schedules.json
         working-directory: island-ferry-tracker
         id: check_changes
