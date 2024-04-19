@@ -1,12 +1,20 @@
 {
     "schedules": [
         {
-            "name": "Winter 2023 Schedule",
-            "start": "2023-10-10",
-            "end": "2024-04-11",
+            "name": "Winter",
+            "start": {
+                "year": 2023,
+                "month": 10,
+                "day": 10
+            },
+            "end": {
+                "year": 2024,
+                "month": 4,
+                "day": 11
+            },
             "locations": {
                 "Ward’s Island": {
-                    "Departs City": [
+                    "DepartsCity": [
                         "06:30",
                         "07:00",
                         "07:30",
@@ -33,7 +41,7 @@
                         "23:00",
                         "23:30"
                     ],
-                    "Departs Island": [
+                    "DepartsIsland": [
                         "06:45",
                         "07:15",
                         "07:45",
@@ -64,12 +72,16 @@
             }
         },
         {
-            "name": "Spring 2024 Schedule",
-            "start": "2024-04-12",
-            "end": null,
+            "name": "Spring",
+            "start": {
+                "year": 2024,
+                "month": 4,
+                "day": 12
+            },
+            "end": {},
             "locations": {
                 "Centre Island": {
-                    "Departs City": [
+                    "DepartsCity": [
                         "08:00",
                         "09:15",
                         "09:45",
@@ -85,7 +97,7 @@
                         "21:25",
                         "23:00"
                     ],
-                    "Departs Island": [
+                    "DepartsIsland": [
                         "08:15",
                         "09:30",
                         "10:00",
@@ -103,7 +115,7 @@
                     ]
                 },
                 "Hanlan’s Point": {
-                    "Departs City": [
+                    "DepartsCity": [
                         "08:30",
                         "10:20",
                         "13:30",
@@ -112,7 +124,7 @@
                         "18:55",
                         "22:20"
                     ],
-                    "Departs Island": [
+                    "DepartsIsland": [
                         "08:45",
                         "10:40",
                         "13:50",
@@ -123,7 +135,7 @@
                     ]
                 },
                 "Ward’s Island": {
-                    "Departs City": [
+                    "DepartsCity": [
                         "06:30",
                         "07:00",
                         "07:30",
@@ -150,7 +162,7 @@
                         "23:00",
                         "23:30"
                     ],
-                    "Departs Island": [
+                    "DepartsIsland": [
                         "06:45",
                         "07:15",
                         "07:45",
