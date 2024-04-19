@@ -10,8 +10,8 @@ message Date {
 
 // Define a message for LocationSchedule
 message LocationSchedule {
-    repeated string Departs_City = 1;
-    repeated string Departs_Island = 2;
+    repeated string departsCity = 1;
+    repeated string departsIsland = 2;
 }
 
 // Define a message for Schedule

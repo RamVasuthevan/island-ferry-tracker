@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='schedule',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x1cmodels/proto/schedules.proto\x12\x08schedule\"0\n\x04\x44\x61te\x12\x0c\n\x04year\x18\x01 \x01(\x05\x12\r\n\x05month\x18\x02 \x01(\x05\x12\x0b\n\x03\x64\x61y\x18\x03 \x01(\x05\"@\n\x10LocationSchedule\x12\x14\n\x0c\x44\x65parts_City\x18\x01 \x03(\t\x12\x16\n\x0e\x44\x65parts_Island\x18\x02 \x03(\t\"\xd8\x01\n\x08Schedule\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x1d\n\x05start\x18\x02 \x01(\x0b\x32\x0e.schedule.Date\x12\x1b\n\x03\x65nd\x18\x03 \x01(\x0b\x32\x0e.schedule.Date\x12\x34\n\tlocations\x18\x04 \x03(\x0b\x32!.schedule.Schedule.LocationsEntry\x1aL\n\x0eLocationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12)\n\x05value\x18\x02 \x01(\x0b\x32\x1a.schedule.LocationSchedule:\x02\x38\x01\"2\n\tSchedules\x12%\n\tschedules\x18\x01 \x03(\x0b\x32\x12.schedule.Scheduleb\x06proto3')
+  serialized_pb=_b('\n\x1cmodels/proto/schedules.proto\x12\x08schedule\"0\n\x04\x44\x61te\x12\x0c\n\x04year\x18\x01 \x01(\x05\x12\r\n\x05month\x18\x02 \x01(\x05\x12\x0b\n\x03\x64\x61y\x18\x03 \x01(\x05\">\n\x10LocationSchedule\x12\x13\n\x0b\x64\x65partsCity\x18\x01 \x03(\t\x12\x15\n\rdepartsIsland\x18\x02 \x03(\t\"\xd8\x01\n\x08Schedule\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x1d\n\x05start\x18\x02 \x01(\x0b\x32\x0e.schedule.Date\x12\x1b\n\x03\x65nd\x18\x03 \x01(\x0b\x32\x0e.schedule.Date\x12\x34\n\tlocations\x18\x04 \x03(\x0b\x32!.schedule.Schedule.LocationsEntry\x1aL\n\x0eLocationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12)\n\x05value\x18\x02 \x01(\x0b\x32\x1a.schedule.LocationSchedule:\x02\x38\x01\"2\n\tSchedules\x12%\n\tschedules\x18\x01 \x03(\x0b\x32\x12.schedule.Scheduleb\x06proto3')
 )
 
 
@@ -78,14 +78,14 @@ _LOCATIONSCHEDULE = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='Departs_City', full_name='schedule.LocationSchedule.Departs_City', index=0,
+      name='departsCity', full_name='schedule.LocationSchedule.departsCity', index=0,
       number=1, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='Departs_Island', full_name='schedule.LocationSchedule.Departs_Island', index=1,
+      name='departsIsland', full_name='schedule.LocationSchedule.departsIsland', index=1,
       number=2, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -104,7 +104,7 @@ _LOCATIONSCHEDULE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=92,
-  serialized_end=156,
+  serialized_end=154,
 )
 
 
@@ -141,8 +141,8 @@ _SCHEDULE_LOCATIONSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=299,
-  serialized_end=375,
+  serialized_start=297,
+  serialized_end=373,
 )
 
 _SCHEDULE = _descriptor.Descriptor(
@@ -192,8 +192,8 @@ _SCHEDULE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=159,
-  serialized_end=375,
+  serialized_start=157,
+  serialized_end=373,
 )
 
 
@@ -223,8 +223,8 @@ _SCHEDULES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=377,
-  serialized_end=427,
+  serialized_start=375,
+  serialized_end=425,
 )
 
 _SCHEDULE_LOCATIONSENTRY.fields_by_name['value'].message_type = _LOCATIONSCHEDULE

@@ -112,8 +112,8 @@ class JsonScheduleGenerator:
             if row != "\n"
         ]
         location_schedule = LocationSchedule()
-        location_schedule.Departs_City.extend(departs_city)
-        location_schedule.Departs_Island.extend(departs_island)
+        location_schedule.departsCity.extend(departs_city)
+        location_schedule.departsIsland.extend(departs_island)
         return location, location_schedule
 
     @staticmethod
