@@ -14,7 +14,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: 'RamVasuthevan/island-ferry-tracker'
-          path: island-ferry-tracker
           ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || 'main' }}
       - name: Setup Python and Pipenv
         uses: actions/setup-python@v5
@@ -24,7 +23,7 @@ jobs:
         run: |
           pip install requests beautifulsoup4
       - name: Run json_schedule_generator.py
-        working-directory: island-ferry-tracker/src/json-schedule-generator
+        working-directory: src/json-schedule-generator
         run: |
           python json_schedule_generator.py
 
@@ -32,7 +31,6 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
       - name: Check for changes in schedules.json
-        working-directory: island-ferry-tracker
         id: check_changes
         run: |
             git diff --exit-code output/schedules.json && (echo "No changes detected in schedules.json" && echo "changes=no" >> $GITHUB_ENV) || (echo "Changes detected in schedules.json" && echo "changes=yes" >> $GITHUB_ENV)
