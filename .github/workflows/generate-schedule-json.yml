@@ -3,7 +3,7 @@ name: Download and Push File
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'  # Run at UTC midnight on the first day of every month
+    - cron: '0 0 * * *'  # Run at UTC midnight every day
 
 jobs:
   generate_schedule_json:
@@ -27,14 +27,29 @@ jobs:
         working-directory: island-ferry-tracker/src/json-schedule-generator
         run: |
           python json_schedule_generator.py
-      - name: Commit and Push if Files Changed
+
+          - name: Get current date
+          id: date
+          run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      - name: Check for changes in schedules.json
         working-directory: island-ferry-tracker
+        id: check_changes
         run: |
-          git config user.name "Automated"
-          git config user.email "actions@users.noreply.github.com"
-          git add .
-          timestamp=$(date -u)
-          # Extract branch name from github.ref, assuming it's in refs/heads/branch_name format
-          branch_name=$(echo $GITHUB_REF | sed -e "s/^refs\/heads\///")
-          git commit -m "Downloaded: ${timestamp}: commit: ${{github.sha}}" || exit 0
-          git push origin HEAD:$branch_name --force
+            git diff --exit-code output/schedules.json && (echo "No changes detected in schedules.json" && echo "changes=no" >> $GITHUB_ENV) || (echo "Changes detected in schedules.json" && echo "changes=yes" >> $GITHUB_ENV)
+        
+      - name: Create Pull Request
+        if: env.changes == 'yes'
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "Automatically updated on ${{ steps.date.outputs.date }}"
+          title: "Update schedules.json - ${{ steps.date.outputs.date }}"
+          branch: "update-schedules-json-${{ steps.date.outputs.date }}-${{ github.run_number }}"
+          labels: automated-pr
+  
+      - name: PR details
+        if: env.changes == 'yes'
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+
