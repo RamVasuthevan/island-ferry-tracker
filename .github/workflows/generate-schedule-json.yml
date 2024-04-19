@@ -30,10 +30,10 @@ jobs:
       - name: Get current date
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
-      - name: Check for changes in schedules.json
+      - name: Check for changes in schedule.json
         id: check_changes
         run: |
-            git diff --exit-code output/schedules.json && (echo "No changes detected in schedules.json" && echo "changes=no" >> $GITHUB_ENV) || (echo "Changes detected in schedules.json" && echo "changes=yes" >> $GITHUB_ENV)
+            git diff --exit-code output/schedule.json && (echo "No changes detected in schedule.json" && echo "changes=no" >> $GITHUB_ENV) || (echo "Changes detected in schedule.json" && echo "changes=yes" >> $GITHUB_ENV)
         
       - name: Create Pull Request
         if: env.changes == 'yes'
