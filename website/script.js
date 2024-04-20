@@ -1,17 +1,19 @@
 function displayCurrentTimeEST() {
-    const options = { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit' };
-    document.getElementById('currentTime').innerText = new Date().toLocaleTimeString('en-US', options);
+    // Displays current time in America/Toronto timezone
+    const currentTime = moment.tz('America/Toronto').format('HH:mm:ss');
+    document.getElementById('currentTime').innerText = currentTime;
 }
 
-async function listTodaySchedule() {
+async function displayAllRoutes() {
+    // Fetches and processes the ferry schedule, adjusting dates to America/Toronto timezone
     const response = await fetch('data/schedule.json');
     const data = await response.json();
     const schedules = data.schedules;
-    const today = new Date().toISOString().split('T')[0];
+    const today = moment.tz('America/Toronto').format('YYYY-MM-DD');
     const routeSelect = document.getElementById('ferryRoute');
 
     schedules.forEach(schedule => {
-        if (new Date(schedule.start) <= new Date(today) && (schedule.end === null || new Date(schedule.end) >= new Date(today))) {
+        if (moment(schedule.start).isSameOrBefore(today) && (schedule.end === null || moment(schedule.end).isSameOrAfter(today))) {
             Object.keys(schedule.locations).forEach(location => {
                 Object.keys(schedule.locations[location]).forEach(direction => {
                     let routeOption;
@@ -31,29 +33,23 @@ async function listTodaySchedule() {
 }
 
 async function showNextFerryTimes(selectedRoute) {
+    // Shows ferry times, highlighting those within the next hour in America/Toronto timezone
     const {location, direction} = JSON.parse(selectedRoute);
-    let routeOption;
-    if (direction === "Departs City") {
-        routeOption = `City to ${location}`;
-    } else if (direction === "Departs Island") {
-        routeOption = `${location} to City`;
-    }
-
     const response = await fetch('data/schedule.json');
     const data = await response.json();
     const schedules = data.schedules;
-    const today = new Date().toISOString().split('T')[0];
+    const today = moment.tz('America/Toronto').format('YYYY-MM-DD');
     const timesContainer = document.getElementById('ferryTimes');
     timesContainer.innerHTML = `<p>Ferries within the next hour are highlighted</p>`;
     timesContainer.classList.add('styledFerryTimes');
 
     schedules.forEach(schedule => {
-        if (new Date(schedule.start) <= new Date(today) && (schedule.end === null || new Date(schedule.end) >= new Date(today))) {
+        if (moment(schedule.start).isSameOrBefore(today) && (schedule.end === null || moment(schedule.end).isSameOrAfter(today))) {
             if (schedule.locations[location] && schedule.locations[location][direction]) {
                 let allTimes = schedule.locations[location][direction];
                 let [remainingTimes, pastTimes] = splitTimes(allTimes);
 
-                let tableHTML = `<table><tr><th>Remaining Schedule for ${routeOption} today:</th></tr>`;
+                let tableHTML = `<table><tr><th>Remaining Schedule for ${location} today:</th></tr>`;
                 if (remainingTimes.length > 0) {
                     remainingTimes.forEach(time => {
                         const highlightClass = isWithinNextHour(time) ? 'class="highlight"' : '';
@@ -61,7 +57,7 @@ async function showNextFerryTimes(selectedRoute) {
                     });
                 }
 
-                tableHTML += `<tr><td>Schedule continuing tomorrow</td></tr>`;
+                tableHTML += `<tr><td>END OF THE DAY</td></tr>`;
 
                 pastTimes.forEach(time => {
                     tableHTML += `<tr><td>${convertToAmPm(time)}</td></tr>`;
@@ -70,60 +66,46 @@ async function showNextFerryTimes(selectedRoute) {
                 tableHTML += `</table>`;
                 timesContainer.innerHTML += tableHTML;
             } else {
-                timesContainer.innerHTML = `<p>No more departures for ${routeOption} today.</p>`;
+                timesContainer.innerHTML = `<p>No more departures for ${location} today.</p>`;
             }
         }
     });
 }
 
 function splitTimes(times) {
-    const currentTime = new Date();
-    const currentHours = currentTime.getHours();
-    const currentMinutes = currentTime.getMinutes();
+    // Splits times into past and future relative to current time in America/Toronto timezone
+    const currentTime = moment.tz('America/Toronto');
     let nextTimes = [];
     let pastTimes = [];
 
-    for (let time of times) {
-        const [hours, minutes] = time.split(':').map(num => parseInt(num, 10));
-        if (hours > currentHours || (hours === currentHours && minutes > currentMinutes)) {
+    times.forEach(time => {
+        const timeToday = moment.tz(time, 'HH:mm', 'America/Toronto');
+        if (timeToday.isAfter(currentTime)) {
             nextTimes.push(time);
         } else {
             pastTimes.push(time);
         }
-    }
+    });
 
     return [nextTimes, pastTimes];
 }
 
 function isWithinNextHour(time) {
-    const currentTime = new Date();
-    const targetTime = new Date();
-    const [hours, minutes] = time.split(':').map(num => parseInt(num, 10));
+    // Checks if a given time is within the next hour in America/Toronto timezone
+    const currentTime = moment.tz('America/Toronto');
+    const targetTime = moment.tz(time, 'HH:mm', 'America/Toronto');
     
-    targetTime.setHours(hours);
-    targetTime.setMinutes(minutes);
-
-    const timeDifference = (targetTime - currentTime) / (1000 * 60);
-    return timeDifference <= 60;
+    return targetTime.diff(currentTime, 'minutes') <= 60 && targetTime.isAfter(currentTime);
 }
 
 function convertToAmPm(time) {
-    const [hours, minutes] = time.split(':');
-    const hoursInt = parseInt(hours, 10);
-    if (hoursInt === 0) {
-        return `12:${minutes} AM`;
-    } else if (hoursInt < 12) {
-        return `${hours}:${minutes} AM`;
-    } else if (hoursInt === 12) {
-        return `${hours}:${minutes} PM`;
-    } else {
-        return `${hoursInt - 12}:${minutes} PM`;
-    }
+    // Converts time to AM/PM format
+    return moment(time, 'HH:mm').format('hh:mm A');
 }
 
 window.onload = function() {
     displayCurrentTimeEST();
-    listTodaySchedule();
+    displayAllRoutes();
     setInterval(displayCurrentTimeEST, 1000);
 };
 
