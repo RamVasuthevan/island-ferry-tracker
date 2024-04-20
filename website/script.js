@@ -1,8 +1,8 @@
 function displayCurrentTimeEST() {
-    // Displays current time in America/Toronto timezone
-    const currentTime = moment.tz('America/Toronto').format('HH:mm:ss');
+    const currentTime = moment.tz('America/Toronto').format('hh:mm:ss A');
     document.getElementById('currentTime').innerText = currentTime;
 }
+
 
 async function displayAllRoutes() {
     // Fetches and processes the ferry schedule, adjusting dates to America/Toronto timezone
