@@ -1,0 +1,23 @@
+.styledFerryTimes {
+    margin-top: 20px;
+    background-color: #f0f0f0; /* Light grey background */
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Soft shadow for emphasis */
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #ddd; /* Light horizontal line between rows */
+}
+th {
+    background-color: #165788;
+    color: white;
+}
+.highlight {
+    background-color: #d3d3d3; /* Grey highlight for times within the next hour */
+}
