@@ -88,39 +88,50 @@
                 if (new Date(schedule.start) <= new Date(today) && (schedule.end === null || new Date(schedule.end) >= new Date(today))) {
                     if (schedule.locations[location] && schedule.locations[location][direction]) {
                         let allTimes = schedule.locations[location][direction];
-                        let remainingTimes = getRemainingTimes(allTimes);
+                        let [remainingTimes, pastTimes] = splitTimes(allTimes);
 
+                        let tableHTML = `<table><tr><th>Remaining Schedule for ${routeOption} today:</th></tr>`;
                         if (remainingTimes.length > 0) {
-                            let tableHTML = `<table><tr><th>Remaining Schedule for ${routeOption} today:</th></tr>`;
                             remainingTimes.forEach(time => {
                                 const highlightClass = isWithinNextHour(time) ? 'class="highlight"' : '';
                                 tableHTML += `<tr ${highlightClass}><td>${convertToAmPm(time)}</td></tr>`;
                             });
-
-                            tableHTML += `</table>`;
-                            timesContainer.innerHTML += tableHTML;
-                        } else {
-                            timesContainer.innerHTML = `<p>No more departures for ${routeOption} today.</p>`;
                         }
+
+                        // Add a blank row to separate today's remaining times from past times
+                        tableHTML += `<tr><td>Schedule continuing tomorrow</td></tr>`;
+
+                        // Add past times
+                        pastTimes.forEach(time => {
+                            tableHTML += `<tr><td>${convertToAmPm(time)}</td></tr>`;
+                        });
+
+                        tableHTML += `</table>`;
+                        timesContainer.innerHTML += tableHTML;
+                    } else {
+                        timesContainer.innerHTML = `<p>No more departures for ${routeOption} today.</p>`;
                     }
                 }
             });
         }
 
-        function getRemainingTimes(times) {
+        function splitTimes(times) {
             const currentTime = new Date();
             const currentHours = currentTime.getHours();
             const currentMinutes = currentTime.getMinutes();
             let nextTimes = [];
+            let pastTimes = [];
 
             for (let time of times) {
                 const [hours, minutes] = time.split(':').map(num => parseInt(num, 10));
                 if (hours > currentHours || (hours === currentHours && minutes > currentMinutes)) {
                     nextTimes.push(time);
+                } else {
+                    pastTimes.push(time);
                 }
             }
 
-            return nextTimes;
+            return [nextTimes, pastTimes];
         }
 
         function isWithinNextHour(time) {
