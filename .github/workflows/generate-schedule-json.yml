@@ -1,0 +1,6 @@
+name: Download and Push File
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 1 * *'  # Run at UTC midnight on the first day of every month
