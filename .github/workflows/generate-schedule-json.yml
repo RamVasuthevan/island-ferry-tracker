@@ -3,4 +3,51 @@ name: Download and Push File
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 1 * *'  # Run at UTC midnight on the first day of every month
+    - cron: '0 0 * * *'  # Run at UTC midnight every day
+
+jobs:
+  generate_schedule_json:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout island-ferry-tracker
+        uses: actions/checkout@v4
+        with:
+          repository: 'RamVasuthevan/island-ferry-tracker'
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || 'main' }}
+      - name: Setup Python and Pipenv
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install requirements
+        run: |
+          pip install requests beautifulsoup4
+      - name: Run json_schedule_generator.py
+        working-directory: src/json-schedule-generator
+        run: |
+          python json_schedule_generator.py
+
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      - name: Check for changes in schedule.json
+        id: check_changes
+        run: |
+            git diff --exit-code output/schedule.json && (echo "No changes detected in schedule.json" && echo "changes=no" >> $GITHUB_ENV) || (echo "Changes detected in schedule.json" && echo "changes=yes" >> $GITHUB_ENV)
+        
+      - name: Create Pull Request
+        if: env.changes == 'yes'
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "Automatically updated on ${{ steps.date.outputs.date }}"
+          title: "Update schedules.json - ${{ steps.date.outputs.date }}"
+          branch: "update-schedules-json-${{ steps.date.outputs.date }}-${{ github.run_number }}"
+          labels: automated-pr
+  
+      - name: PR details
+        if: env.changes == 'yes'
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+
