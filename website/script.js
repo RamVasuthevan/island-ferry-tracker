@@ -17,9 +17,9 @@ async function displayAllRoutes() {
             Object.keys(schedule.locations).forEach(location => {
                 Object.keys(schedule.locations[location]).forEach(direction => {
                     let routeOption;
-                    if (direction === "Departs City") {
+                    if (direction === "departsCity") {
                         routeOption = `City to ${location}`;
-                    } else if (direction === "Departs Island") {
+                    } else if (direction === "departsIsland") {
                         routeOption = `${location} to City`;
                     }
                     const option = document.createElement('option');
