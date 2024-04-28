@@ -65,8 +65,6 @@ async function showNextFerryTimes(selectedRoute) {
 
                 tableHTML += `</table>`;
                 timesContainer.innerHTML += tableHTML;
-            } else {
-                timesContainer.innerHTML = `<p>No more departures for ${location} today.</p>`;
             }
         }
     });
