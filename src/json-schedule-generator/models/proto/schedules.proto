@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package schedule;
+
+message Date {
+    int32 year = 1;
+    int32 month = 2;
+    int32 day = 3;
+}
+
+// Define a message for LocationSchedule
+message LocationSchedule {
+    repeated string departsCity = 1;
+    repeated string departsIsland = 2;
+}
+
+// Define a message for Schedule
+message Schedule {
+    string name = 1;
+    Date start = 2; // Using string to represent dates in YYYY-MM-DD format
+    Date end = 3;   // Optional date field
+    map<string, LocationSchedule> locations = 4;
+}
+
+message Schedules {
+    repeated Schedule schedules = 1;
+}
