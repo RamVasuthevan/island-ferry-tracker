@@ -13,7 +13,7 @@ async function displayAllRoutes() {
     const routeSelect = document.getElementById('ferryRoute');
 
     schedules.forEach(schedule => {
-        if (moment(schedule.start).isSameOrBefore(today) && (schedule.end === null || moment(schedule.end).isSameOrAfter(today))) {
+        if (moment(`${schedule.start.year}-${schedule.start.month}-${schedule.start.day}`).tz('America/Toronto').isSameOrBefore(today) && (Object.keys(schedule.end).length === 0 || moment(`${schedule.end.year}-${schedule.end.month}-${schedule.end.day}`).tz('America/Toronto').isSameOrAfter(today))) {
             Object.keys(schedule.locations).forEach(location => {
                 Object.keys(schedule.locations[location]).forEach(direction => {
                     let routeOption;
@@ -44,7 +44,7 @@ async function showNextFerryTimes(selectedRoute) {
     timesContainer.classList.add('styledFerryTimes');
 
     schedules.forEach(schedule => {
-        if (moment(schedule.start).isSameOrBefore(today) && (schedule.end === null || moment(schedule.end).isSameOrAfter(today))) {
+        if (moment(`${schedule.start.year}-${schedule.start.month}-${schedule.start.day}`).tz('America/Toronto').isSameOrBefore(today) && (Object.keys(schedule.end).length === 0 || moment(`${schedule.end.year}-${schedule.end.month-1}-${schedule.end.day}`).tz('America/Toronto').isSameOrAfter(today))) {
             if (schedule.locations[location] && schedule.locations[location][direction]) {
                 let allTimes = schedule.locations[location][direction];
                 let [remainingTimes, pastTimes] = splitTimes(allTimes);
@@ -72,29 +72,31 @@ async function showNextFerryTimes(selectedRoute) {
 
 function splitTimes(times) {
     // Splits times into past and future relative to current time in America/Toronto timezone
-    const currentTime = moment.tz('America/Toronto');
+    const now = moment.tz('America/Toronto');
     let nextTimes = [];
     let pastTimes = [];
 
     times.forEach(time => {
-        const timeToday = moment.tz(time, 'HH:mm', 'America/Toronto');
-        if (timeToday.isAfter(currentTime)) {
+        // Create a moment object for the time entry with today's date in America/Toronto timezone
+        const timeMoment = moment.tz(`${now.format('YYYY-MM-DD')} ${time}`, 'YYYY-MM-DD HH:mm', 'America/Toronto');
+        if (timeMoment.isAfter(now)) {
             nextTimes.push(time);
         } else {
             pastTimes.push(time);
         }
     });
-
     return [nextTimes, pastTimes];
 }
 
 function isWithinNextHour(time) {
     // Checks if a given time is within the next hour in America/Toronto timezone
-    const currentTime = moment.tz('America/Toronto');
-    const targetTime = moment.tz(time, 'HH:mm', 'America/Toronto');
-    
-    return targetTime.diff(currentTime, 'minutes') <= 60 && targetTime.isAfter(currentTime);
+    const now = moment.tz('America/Toronto');
+    // Create a moment object for the time entry with today's date in America/Toronto timezone
+    const targetTime = moment.tz(`${now.format('YYYY-MM-DD')} ${time}`, 'YYYY-MM-DD HH:mm', 'America/Toronto');
+
+    return targetTime.diff(now, 'minutes') <= 60 && targetTime.isAfter(now);
 }
+
 
 function convertToAmPm(time) {
     // Converts time to AM/PM format
