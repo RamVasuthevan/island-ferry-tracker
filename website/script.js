@@ -8,12 +8,29 @@ async function displayAllRoutes() {
     // Fetches and processes the ferry schedule, adjusting dates to America/Toronto timezone
     const response = await fetch('data/schedule.json');
     const data = await response.json();
+    
     const schedules = data.schedules;
     const today = moment.tz('America/Toronto').format('YYYY-MM-DD');
     const routeSelect = document.getElementById('ferryRoute');
 
     schedules.forEach(schedule => {
-        if (moment(`${schedule.start.year}-${schedule.start.month}-${schedule.start.day}`).tz('America/Toronto').isSameOrBefore(today) && (Object.keys(schedule.end).length === 0 || moment(`${schedule.end.year}-${schedule.end.month}-${schedule.end.day}`).tz('America/Toronto').isSameOrAfter(today))) {
+        const startDate = moment.tz({
+            year: schedule.start.year,
+            month: schedule.start.month - 1,  // Adjust month for zero-based indexing
+            day: schedule.start.day
+        }, 'America/Toronto');
+        
+        // Assume endDate is valid indefinitely if not specified
+        let endDate = moment.tz('9999-12-31', 'America/Toronto');
+        if (Object.keys(schedule.end).length !== 0) {
+            endDate = moment.tz({
+                year: schedule.end.year,
+                month: schedule.end.month - 1,
+                day: schedule.end.day
+            }, 'America/Toronto');
+        }
+
+        if (startDate.isSameOrBefore(today) && endDate.isSameOrAfter(today)) {
             Object.keys(schedule.locations).forEach(location => {
                 Object.keys(schedule.locations[location]).forEach(direction => {
                     let routeOption;
@@ -44,7 +61,22 @@ async function showNextFerryTimes(selectedRoute) {
     timesContainer.classList.add('styledFerryTimes');
 
     schedules.forEach(schedule => {
-        if (moment(`${schedule.start.year}-${schedule.start.month}-${schedule.start.day}`).tz('America/Toronto').isSameOrBefore(today) && (Object.keys(schedule.end).length === 0 || moment(`${schedule.end.year}-${schedule.end.month-1}-${schedule.end.day}`).tz('America/Toronto').isSameOrAfter(today))) {
+        const startDate = moment.tz({
+            year: schedule.start.year,
+            month: schedule.start.month - 1, // Correct for zero-indexed months
+            day: schedule.start.day
+        }, 'America/Toronto');
+        
+        let endDate = moment.tz('9999-12-31', 'America/Toronto'); // Assume indefinitely valid end date
+        if (Object.keys(schedule.end).length !== 0) {
+            endDate = moment.tz({
+                year: schedule.end.year,
+                month: schedule.end.month - 1, // Correct month indexing and adjust for zero-indexed months
+                day: schedule.end.day
+            }, 'America/Toronto');
+        }
+        
+        if (startDate.isSameOrBefore(today) && endDate.isSameOrAfter(today)) {
             if (schedule.locations[location] && schedule.locations[location][direction]) {
                 let allTimes = schedule.locations[location][direction];
                 let [remainingTimes, pastTimes] = splitTimes(allTimes);
