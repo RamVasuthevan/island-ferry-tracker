@@ -4,8 +4,12 @@ function createDate(year, month, day, time = null) {
     return moment.tz(dateStr, time ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD', 'America/Toronto');
 }
 
+function createToday(){
+    return moment.tz('America/Toronto')
+}
+
 function displayCurrentTimeEST() {
-    const currentTime = moment.tz('America/Toronto').format('hh:mm:ss A');
+    const currentTime = createToday().format('hh:mm:ss A');
     document.getElementById('currentTime').innerText = currentTime;
 }
 
@@ -15,7 +19,7 @@ async function displayAllRoutes() {
     const data = await response.json();
     
     const schedules = data.schedules;
-    const today = moment.tz('America/Toronto').format('YYYY-MM-DD');
+    const today = createToday().format('YYYY-MM-DD');
     const routeSelect = document.getElementById('ferryRoute');
 
     schedules.forEach(schedule => {
@@ -52,7 +56,7 @@ async function showNextFerryTimes(selectedRoute) {
     const response = await fetch('data/schedule.json');
     const data = await response.json();
     const schedules = data.schedules;
-    const today = moment.tz('America/Toronto').format('YYYY-MM-DD');
+    const today = createToday().format('YYYY-MM-DD');
     const timesContainer = document.getElementById('ferryTimes');
     timesContainer.innerHTML = `<p>Ferries within the next hour are highlighted</p>`;
     timesContainer.classList.add('styledFerryTimes');
