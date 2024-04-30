@@ -103,7 +103,7 @@ function splitTimes(times) {
 
     times.forEach(time => {
         // Create a moment object for the time entry with today's date in America/Toronto timezone
-        const timeMoment = moment.tz(`${now.format('YYYY-MM-DD')} ${time}`, 'YYYY-MM-DD HH:mm', 'America/Toronto');
+        const timeMoment = createDate(now.year(), now.month() + 1, now.date(), time);
         if (timeMoment.isAfter(now)) {
             nextTimes.push(time);
         } else {
@@ -117,7 +117,7 @@ function isWithinNextHour(time) {
     // Checks if a given time is within the next hour in America/Toronto timezone
     const now = createToday();
     // Create a moment object for the time entry with today's date in America/Toronto timezone
-    const targetTime = moment.tz(`${createToday().format('YYYY-MM-DD')} ${time}`, 'YYYY-MM-DD HH:mm', 'America/Toronto');
+    const targetTime = createDate(createToday().year(), createToday().month() + 1, createToday().date(), time);
 
     return targetTime.diff(now, 'minutes') <= 60 && targetTime.isAfter(now);
 }
