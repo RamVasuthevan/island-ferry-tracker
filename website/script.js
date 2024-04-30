@@ -97,7 +97,7 @@ async function showNextFerryTimes(selectedRoute) {
 
 function splitTimes(times) {
     // Splits times into past and future relative to current time in America/Toronto timezone
-    const now = moment.tz('America/Toronto');
+    const now = createToday();
     let nextTimes = [];
     let pastTimes = [];
 
@@ -115,9 +115,9 @@ function splitTimes(times) {
 
 function isWithinNextHour(time) {
     // Checks if a given time is within the next hour in America/Toronto timezone
-    const now = moment.tz('America/Toronto');
+    const now = createToday();
     // Create a moment object for the time entry with today's date in America/Toronto timezone
-    const targetTime = moment.tz(`${now.format('YYYY-MM-DD')} ${time}`, 'YYYY-MM-DD HH:mm', 'America/Toronto');
+    const targetTime = moment.tz(`${createToday().format('YYYY-MM-DD')} ${time}`, 'YYYY-MM-DD HH:mm', 'America/Toronto');
 
     return targetTime.diff(now, 'minutes') <= 60 && targetTime.isAfter(now);
 }
