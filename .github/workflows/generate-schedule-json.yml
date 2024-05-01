@@ -21,7 +21,7 @@ jobs:
           python-version: '3.12'
       - name: Install requirements
         run: |
-          pip install requests beautifulsoup4 protobuf
+          pip install requests beautifulsoup4 protobuf==3.20.*
       - name: Run json_schedule_generator.py
         working-directory: src/json-schedule-generator
         run: |
