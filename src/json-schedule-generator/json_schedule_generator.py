@@ -20,7 +20,7 @@ class JsonScheduleGenerator:
     SEASONS = ["spring", "summer", "fall", "winter"]
 
     @staticmethod
-    def create_schedules(*, schedules_soup: BeautifulSoup) -> Any:
+    def create_schedules(*, schedules_soup: BeautifulSoup) -> Schedules:
         schedules_list = []
         for season in JsonScheduleGenerator.SEASONS:
             LOGGER.info(f"Creating schedule for {season}")
@@ -92,7 +92,7 @@ class JsonScheduleGenerator:
     def _create_location_schedule(
         *,
         location_schedule_soup: List[BeautifulSoup],
-    ) -> Tuple[str, Any]:
+    ) -> Tuple[str, LocationSchedule]:
         location = (
             location_schedule_soup.contents[3].contents[1].contents[3].contents[0]
         )
@@ -136,7 +136,7 @@ class JsonScheduleGenerator:
         return time_obj.strftime("%H:%M")
 
 
-def datetime_date_to_date(date: datetime.date) -> Any:
+def datetime_date_to_date(date: datetime.date) -> Date:
     if date is None:
         return Date()
     result = Date()
@@ -146,7 +146,7 @@ def datetime_date_to_date(date: datetime.date) -> Any:
     return result
 
 
-def date_to_datetime_date(date: Any) -> datetime.date:
+def date_to_datetime_date(date: Date) -> datetime.date:
     return datetime.date(year=date.year, month=date.month, day=date.day)
 
 
