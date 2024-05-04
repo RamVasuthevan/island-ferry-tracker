@@ -1,8 +1,17 @@
-function displayCurrentTimeEST() {
-    const currentTime = moment.tz('America/Toronto').format('hh:mm:ss A');
-    document.getElementById('currentTime').innerText = currentTime;
+function createDate(year, month, day, time = null) {
+    // Creates a moment object with the specified date and time (optional) in America/Toronto timezone
+    const dateStr = `${year}-${month}-${day}` + (time ? ` ${time}` : '');
+    return moment.tz(dateStr, time ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD', 'America/Toronto');
 }
 
+function createToday(){
+    return moment.tz('America/Toronto')
+}
+
+function displayCurrentTimeEST() {
+    const currentTime = createToday().format('hh:mm:ss A');
+    document.getElementById('currentTime').innerText = currentTime;
+}
 
 async function displayAllRoutes() {
     // Fetches and processes the ferry schedule, adjusting dates to America/Toronto timezone
@@ -10,24 +19,16 @@ async function displayAllRoutes() {
     const data = await response.json();
     
     const schedules = data.schedules;
-    const today = moment.tz('America/Toronto').format('YYYY-MM-DD');
+    const today = createToday().format('YYYY-MM-DD');
     const routeSelect = document.getElementById('ferryRoute');
 
     schedules.forEach(schedule => {
-        const startDate = moment.tz({
-            year: schedule.start.year,
-            month: schedule.start.month - 1,  // Adjust month for zero-based indexing
-            day: schedule.start.day
-        }, 'America/Toronto');
+        const startDate = createDate(schedule.start.year, schedule.start.month, schedule.start.day);
         
         // Assume endDate is valid indefinitely if not specified
-        let endDate = moment.tz('9999-12-31', 'America/Toronto');
+        let endDate = createDate(9999, 12, 31);
         if (Object.keys(schedule.end).length !== 0) {
-            endDate = moment.tz({
-                year: schedule.end.year,
-                month: schedule.end.month - 1,
-                day: schedule.end.day
-            }, 'America/Toronto');
+            endDate = createDate(schedule.end.year, schedule.end.month, schedule.end.day);
         }
 
         if (startDate.isSameOrBefore(today) && endDate.isSameOrAfter(today)) {
@@ -55,25 +56,17 @@ async function showNextFerryTimes(selectedRoute) {
     const response = await fetch('data/schedule.json');
     const data = await response.json();
     const schedules = data.schedules;
-    const today = moment.tz('America/Toronto').format('YYYY-MM-DD');
+    const today = createToday().format('YYYY-MM-DD');
     const timesContainer = document.getElementById('ferryTimes');
     timesContainer.innerHTML = `<p>Ferries within the next hour are highlighted</p>`;
     timesContainer.classList.add('styledFerryTimes');
 
     schedules.forEach(schedule => {
-        const startDate = moment.tz({
-            year: schedule.start.year,
-            month: schedule.start.month - 1, // Correct for zero-indexed months
-            day: schedule.start.day
-        }, 'America/Toronto');
+        const startDate = createDate(schedule.start.year, schedule.start.month, schedule.start.day);
         
-        let endDate = moment.tz('9999-12-31', 'America/Toronto'); // Assume indefinitely valid end date
+        let endDate = createDate(9999, 12, 31); // Assume indefinitely valid end date
         if (Object.keys(schedule.end).length !== 0) {
-            endDate = moment.tz({
-                year: schedule.end.year,
-                month: schedule.end.month - 1, // Correct month indexing and adjust for zero-indexed months
-                day: schedule.end.day
-            }, 'America/Toronto');
+            endDate = createDate(schedule.end.year, schedule.end.month, schedule.end.day);
         }
         
         if (startDate.isSameOrBefore(today) && endDate.isSameOrAfter(today)) {
@@ -104,13 +97,13 @@ async function showNextFerryTimes(selectedRoute) {
 
 function splitTimes(times) {
     // Splits times into past and future relative to current time in America/Toronto timezone
-    const now = moment.tz('America/Toronto');
+    const now = createToday();
     let nextTimes = [];
     let pastTimes = [];
 
     times.forEach(time => {
         // Create a moment object for the time entry with today's date in America/Toronto timezone
-        const timeMoment = moment.tz(`${now.format('YYYY-MM-DD')} ${time}`, 'YYYY-MM-DD HH:mm', 'America/Toronto');
+        const timeMoment = createDate(now.year(), now.month() + 1, now.date(), time);
         if (timeMoment.isAfter(now)) {
             nextTimes.push(time);
         } else {
@@ -122,9 +115,9 @@ function splitTimes(times) {
 
 function isWithinNextHour(time) {
     // Checks if a given time is within the next hour in America/Toronto timezone
-    const now = moment.tz('America/Toronto');
+    const now = createToday();
     // Create a moment object for the time entry with today's date in America/Toronto timezone
-    const targetTime = moment.tz(`${now.format('YYYY-MM-DD')} ${time}`, 'YYYY-MM-DD HH:mm', 'America/Toronto');
+    const targetTime = createDate(createToday().year(), createToday().month() + 1, createToday().date(), time);
 
     return targetTime.diff(now, 'minutes') <= 60 && targetTime.isAfter(now);
 }
