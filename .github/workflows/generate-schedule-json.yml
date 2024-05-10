@@ -24,6 +24,7 @@ jobs:
       - name: Run json_schedule_generator.py
         working-directory: src/json-schedule-generator
         run: |
+          ls
           pip install pipenv
           pipenv install
           pipenv run json_schedule_generator.py
