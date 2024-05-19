@@ -1,13 +1,15 @@
 import datetime
 import json
 import logging
+import re
 from dataclasses import asdict
 from typing import Any, List, Optional, Tuple
-from google.protobuf import json_format
 
 from bs4 import BeautifulSoup
+from google.protobuf import json_format
+from models.proto.schedules_pb2 import (Date, LocationSchedule, Schedule,
+                                        Schedules)
 from schedule_scraper import ScheduleScraper
-from models.proto.schedules_pb2 import Date, LocationSchedule, Schedule, Schedules
 
 logging.basicConfig(
     level=logging.INFO,
