@@ -1,13 +1,15 @@
 import datetime
 import json
 import logging
+import re
 from dataclasses import asdict
 from typing import Any, List, Optional, Tuple
-from google.protobuf import json_format
 
 from bs4 import BeautifulSoup
+from google.protobuf import json_format
+from models.proto.schedules_pb2 import (Date, LocationSchedule, Schedule,
+                                        Schedules)
 from schedule_scraper import ScheduleScraper
-from models.proto.schedules_pb2 import Date, LocationSchedule, Schedule, Schedules
 
 logging.basicConfig(
     level=logging.INFO,
@@ -76,17 +78,29 @@ class JsonScheduleGenerator:
     @staticmethod
     def _get_start_date(*, schedule_caption: str) -> Optional[datetime.date]:
         LOGGER.info("Finding start date")
-        if "starts" in schedule_caption:
-            words = schedule_caption.split()
-            start_date = f"{' '.join(words[-2:])} {words[1]}"  # e.g. The 2024 spring schedule starts on April 12.
-            return datetime.datetime.strptime(start_date, "%B %d. %Y").date()
-        if "started" in schedule_caption:
-            words = schedule_caption.split()
-            start_date = " ".join(
-                words[-3:]
-            )  # e.g. This winter schedule started on October 10, 2023.
-            return datetime.datetime.strptime(start_date, "%B %d, %Y.").date()
-        return None
+        month, day, year = JsonScheduleGenerator.parse_date(schedule_caption)
+        if any(info is None for info in [month, day, year]):
+            return None
+        return datetime.datetime.strptime(f"{month} {day} {year}", "%B %d %Y").date()
+
+    @staticmethod
+    def parse_date(sentence) -> Tuple[Optional[str], Optional[int], Optional[int]]:
+        # Define the regex patterns for month, day, and year
+        month_pattern = r'(January|February|March|April|May|June|July|August|September|October|November|December)'
+        day_pattern = r'\b([1-9]|[12][0-9]|3[01])\b'
+        year_pattern = r'\b(\d{4})\b'
+
+        # Search for the patterns in the sentence
+        month_match = re.search(month_pattern, sentence, re.IGNORECASE)
+        day_match = re.search(day_pattern, sentence)
+        year_match = re.search(year_pattern, sentence)
+
+        # Extract the matched values
+        month = month_match.group(0) if month_match else None
+        day = int(day_match.group(0)) if day_match else None
+        year = int(year_match.group(0)) if year_match else None
+
+        return month, day, year
 
     @staticmethod
     def _create_location_schedule(
