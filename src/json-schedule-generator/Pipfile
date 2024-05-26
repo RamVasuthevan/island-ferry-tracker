@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 requests = "2.32.2"
 beautifulsoup4 = "4.12.3"
-protobuf = "3.20"
+protobuf = "5.27.0"
 
 [dev-packages]
 black = "24.4.2"
