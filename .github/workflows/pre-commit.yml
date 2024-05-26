@@ -1,0 +1,44 @@
+name: Pre-commit
+
+on:
+  workflow_dispatch:
+  pull-request:
+
+jobs:
+  generate_schedule_json:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout island-ferry-tracker
+        uses: actions/checkout@v4
+        with:
+          repository: 'RamVasuthevan/island-ferry-tracker'
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || 'main' }}
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install protobuf
+        run: apt install -y protobuf-compiler
+
+      - name: Generate protobuf files
+        working-directory: src/json-schedule-generator
+        run: protoc -I=models/proto --python_out=models/proto models/proto/schedules.proto
+
+      - name: Run json_schedule_generator.py
+        working-directory: src/json-schedule-generator
+        run: |
+          pip install pipenv
+          pipenv install
+          pipenv run python json_schedule_generator.py
+
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      - name: Check for changes in schedule.json
+        id: check_changes
+        run: |
+            git diff --exit-code output/schedule.json && (echo "No changes detected in schedule.json" && echo "changes=no" >> $GITHUB_ENV) || (echo "Changes detected in schedule.json" && echo "changes=yes" >> $GITHUB_ENV)
+
