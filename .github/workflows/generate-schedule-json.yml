@@ -36,7 +36,7 @@ jobs:
         id: check_changes
         run: |
           git diff --exit-code output/schedule.json output/schedule.html && \
-          (echo "No changes detected in output files" && echo "changes=no" >> $GITHUB_ENV) || \
+          echo "No changes in files" || \
           (echo "Changes detected in output files" && echo "changes=yes" >> $GITHUB_ENV)
         
       - name: Create Pull Request
