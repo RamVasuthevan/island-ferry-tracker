@@ -31,10 +31,13 @@ jobs:
       - name: Get current date
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
-      - name: Check for changes in schedule.json
+
+      - name: Check for changes in output files
         id: check_changes
         run: |
-            git diff --exit-code output/schedule.json && (echo "No changes detected in schedule.json" && echo "changes=no" >> $GITHUB_ENV) || (echo "Changes detected in schedule.json" && echo "changes=yes" >> $GITHUB_ENV)
+          git diff --exit-code output/schedule.json output/schedule.html && \
+          echo "No changes in files" || \
+          (echo "Changes detected in output files" && echo "changes=yes" >> $GITHUB_ENV)
         
       - name: Create Pull Request
         if: env.changes == 'yes'
@@ -42,8 +45,8 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         with:
           commit-message: "Automatically updated on ${{ steps.date.outputs.date }}"
-          title: "Update schedules.json - ${{ steps.date.outputs.date }}"
-          branch: "update-schedules-json-${{ steps.date.outputs.date }}-${{ github.run_number }}"
+          title: "Update schedules files - ${{ steps.date.outputs.date }}"
+          branch: "update-schedules-files-${{ steps.date.outputs.date }}-${{ github.run_number }}"
           labels: automated-pr
   
       - name: PR details
@@ -51,4 +54,3 @@ jobs:
         run: |
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
-
