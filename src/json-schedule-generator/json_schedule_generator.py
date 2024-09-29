@@ -145,6 +145,8 @@ class JsonScheduleGenerator:
 
     @staticmethod
     def _format_time(*, time: str) -> str:
+        if time.lower() == "noon":
+            return "12:00"
         time = time.replace("a.m.", "AM").replace("p.m.", "PM")
         time_obj = datetime.datetime.strptime(time, "%I:%M %p")
         return time_obj.strftime("%H:%M")
