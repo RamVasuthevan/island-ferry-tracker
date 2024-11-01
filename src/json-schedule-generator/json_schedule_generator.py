@@ -7,8 +7,7 @@ from typing import Any, List, Optional, Tuple
 
 from bs4 import BeautifulSoup
 from google.protobuf import json_format
-from models.proto.schedules_pb2 import (Date, LocationSchedule, Schedule,
-                                        Schedules)
+from models.proto.schedules_pb2 import Date, LocationSchedule, Schedule, Schedules
 from schedule_scraper import ScheduleScraper
 
 logging.basicConfig(
@@ -86,9 +85,9 @@ class JsonScheduleGenerator:
     @staticmethod
     def parse_date(sentence) -> Tuple[Optional[str], Optional[int], Optional[int]]:
         # Define the regex patterns for month, day, and year
-        month_pattern = r'(January|February|March|April|May|June|July|August|September|October|November|December)'
-        day_pattern = r'\b([1-9]|[12][0-9]|3[01])\b'
-        year_pattern = r'\b(\d{4})\b'
+        month_pattern = r"(January|February|March|April|May|June|July|August|September|October|November|December)"
+        day_pattern = r"\b([1-9]|[12][0-9]|3[01])\b"
+        year_pattern = r"\b(\d{4})\b"
 
         # Search for the patterns in the sentence
         month_match = re.search(month_pattern, sentence, re.IGNORECASE)
