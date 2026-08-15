@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout island-ferry-tracker
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: 'RamVasuthevan/island-ferry-tracker'
           ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || 'main' }}
