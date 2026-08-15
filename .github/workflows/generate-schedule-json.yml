@@ -11,13 +11,13 @@ jobs:
 
     steps:
       - name: Checkout island-ferry-tracker
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: 'RamVasuthevan/island-ferry-tracker'
           ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || 'main' }}
       
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
@@ -39,7 +39,7 @@ jobs:
       - name: Create Pull Request
         if: env.changes == 'yes'
         id: cpr
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "Automatically updated on ${{ steps.date.outputs.date }}"
           title: "Update schedules.json - ${{ steps.date.outputs.date }}"
