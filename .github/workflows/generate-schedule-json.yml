@@ -19,7 +19,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v7
         with:
-          python-version: '3.12'
+          python-version: '3.14'
 
       - name: Run json_schedule_generator.py
         working-directory: src/json-schedule-generator
