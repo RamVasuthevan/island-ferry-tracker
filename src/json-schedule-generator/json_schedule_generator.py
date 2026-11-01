@@ -27,13 +27,18 @@ class JsonScheduleGenerator:
             LOGGER.info(f"Creating schedule for {season}")
             table_id = f"accordion-{season}-schedule"
             schedule_soup = schedules_soup.find(id=table_id)
-            if not JsonScheduleGenerator._is_valid_schedule(
+            if schedule_soup is None or not JsonScheduleGenerator._is_valid_schedule(
                 schedule_soup=schedule_soup
             ):
                 continue
             schedules_list.append(
                 JsonScheduleGenerator._create_schedule(schedule_soup=schedule_soup)
             )
+        current_schedule = JsonScheduleGenerator._create_current_schedule(
+            schedules_soup=schedules_soup, today=datetime.date.today()
+        )
+        if current_schedule is not None:
+            schedules_list.append(current_schedule)
         LOGGER.info("Created all schedules")
         JsonScheduleGenerator._populate_end_dates(schedules=schedules_list)
         schedules = Schedules()
@@ -43,6 +48,8 @@ class JsonScheduleGenerator:
     @staticmethod
     def _is_valid_schedule(*, schedule_soup) -> bool:
         table_soup = schedule_soup.find("table", class_="cot-table")
+        if table_soup is None:
+            return False
         start = JsonScheduleGenerator._get_start_date(
             schedule_caption=table_soup.contents[1].contents[0]
         )
@@ -72,6 +79,35 @@ class JsonScheduleGenerator:
         )
         for location, location_schedule in locations.items():
             schedule.locations[location].CopyFrom(location_schedule)
+        return schedule
+
+    @staticmethod
+    def _create_current_schedule(
+        *, schedules_soup: BeautifulSoup, today: datetime.date
+    ) -> Optional[Schedule]:
+        heading = schedules_soup.find("h2", string=re.compile(r"Schedule:"))
+        if heading is None:
+            return None
+        LOGGER.info(f"Creating current schedule from {heading.text}")
+        match = re.search(r"Schedule: (\w+ \d+)", heading.text)
+        start = datetime.datetime.strptime(
+            f"{match.group(1)} {today.year}", "%B %d %Y"
+        ).date()
+        if start > today:
+            start = start.replace(year=today.year - 1)
+        schedule = Schedule()
+        schedule.name = heading.text.split()[0]
+        schedule.start.CopyFrom(datetime_date_to_date(start))
+        for sibling in heading.find_next_siblings():
+            if sibling.name == "table" and "cot-table" in sibling.get("class", []):
+                location, location_schedule = (
+                    JsonScheduleGenerator._create_location_schedule(
+                        location_schedule_soup=sibling
+                    )
+                )
+                schedule.locations[location].CopyFrom(location_schedule)
+            elif sibling.name not in ("p", "h3", "table"):
+                break
         return schedule
 
     @staticmethod
@@ -106,23 +142,18 @@ class JsonScheduleGenerator:
         *,
         location_schedule_soup: List[BeautifulSoup],
     ) -> Tuple[str, LocationSchedule]:
-        location = (
-            location_schedule_soup.contents[3].contents[1].contents[3].contents[0]
-        )
+        location = location_schedule_soup.find("thead").find_all("th")[1].text
         LOGGER.info(f"Creating location schedule for {location}")
-        if not isinstance(location, str):
-            location = location.contents[0]
         location = " ".join(location.split()[1:])
-        rows = location_schedule_soup.contents[5].contents
+        rows = [
+            row.find_all("td")
+            for row in location_schedule_soup.find("tbody").find_all("tr")
+        ]
         departs_city = [
-            JsonScheduleGenerator._format_time(time=row.contents[1].contents[0])
-            for row in rows
-            if row != "\n"
+            JsonScheduleGenerator._format_time(time=row[0].text) for row in rows
         ]
         departs_island = [
-            JsonScheduleGenerator._format_time(time=row.contents[3].contents[0])
-            for row in rows
-            if row != "\n"
+            JsonScheduleGenerator._format_time(time=row[1].text) for row in rows
         ]
         location_schedule = LocationSchedule()
         location_schedule.departsCity.extend(departs_city)
@@ -144,6 +175,7 @@ class JsonScheduleGenerator:
 
     @staticmethod
     def _format_time(*, time: str) -> str:
+        time = time.replace("*", "").strip()
         if time.lower() == "noon":
             return "12:00"
         time = time.replace("a.m.", "AM").replace("p.m.", "PM")

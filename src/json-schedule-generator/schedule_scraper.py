@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 class ScheduleScraper:
     SCHEDULE_URL: str = (
-        "https://www.toronto.ca/explore-enjoy/parks-gardens-beaches/toronto-island-park/all-ferry-schedules/"
+        "https://www.toronto.ca/explore-enjoy/toronto-island-ferries/ferry-routes-schedules/"
     )
     LOGGER: logging.Logger = logging.getLogger("schedule_scraper")
 
